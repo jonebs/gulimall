@@ -3,6 +3,7 @@ package cn.ggb.gulimall.member.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import cn.ggb.gulimall.member.feign.CouponFeignService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +15,6 @@ import cn.ggb.gulimall.member.entity.MemberEntity;
 import cn.ggb.gulimall.member.service.MemberService;
 import cn.ggb.common.utils.PageUtils;
 import cn.ggb.common.utils.R;
-
 
 
 /**
@@ -29,6 +29,17 @@ import cn.ggb.common.utils.R;
 public class MemberController {
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    CouponFeignService couponFeignService;
+
+    @RequestMapping("/coupons")
+    public R test(){
+        MemberEntity memberEntity = new MemberEntity();
+        memberEntity.setNickname("张三");
+        R membercoupoons = couponFeignService.membercoupoons();
+        return R.ok().put("member",memberEntity).put("coupon",membercoupoons.get("coupon"));
+    }
 
     /**
      * 列表
