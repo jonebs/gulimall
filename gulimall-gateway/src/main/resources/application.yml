@@ -2,9 +2,17 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: product_route
+          uri: lb://gulimall-product  # lb负载均衡
+          predicates:
+            - Path=/api/product/**  # path指定对应路径
+          filters: # 重写路径
+            - RewritePath=/api/?(?<segment>.*), /$\{segment}
+
         - id: admin_route
           uri: lb://renren-fast  # lb负载均衡
           predicates:
             - Path=/api/**  # path指定对应路径
           filters: # 重写路径
             - RewritePath=/api/?(?<segment>.*), /renren-fast/$\{segment}
+
