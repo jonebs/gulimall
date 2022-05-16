@@ -1,5 +1,8 @@
 package cn.ggb.gulimall.product.service.impl;
 
+import cn.ggb.gulimall.product.entity.CategoryBrandRelationEntity;
+import cn.ggb.gulimall.product.service.CategoryBrandRelationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,10 +20,14 @@ import cn.ggb.common.utils.Query;
 import cn.ggb.gulimall.product.dao.CategoryDao;
 import cn.ggb.gulimall.product.entity.CategoryEntity;
 import cn.ggb.gulimall.product.service.CategoryService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
+
+    @Autowired
+    CategoryBrandRelationService categoryBrandRelationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -71,6 +78,18 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
 
         return parentPath.toArray(new Long[parentPath.size()]);
+    }
+
+    /**
+     * 级联更新所有相关数据
+     * @param category
+     */
+    @Transactional
+    @Override
+    public void updateCascade(CategoryEntity category) {
+        this.updateById(category);
+        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
+
     }
 
     //225,25,2
