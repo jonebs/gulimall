@@ -41,5 +41,7 @@ public class AttrVo {
      */
     private Integer showDesc;
 
+    private Integer valueType;
+
     private Long attrGroupId;
 }

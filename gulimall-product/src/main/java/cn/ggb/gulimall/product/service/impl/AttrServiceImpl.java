@@ -9,12 +9,12 @@ import cn.ggb.gulimall.product.entity.CategoryEntity;
 import cn.ggb.gulimall.product.service.CategoryService;
 import cn.ggb.gulimall.product.vo.AttrRespVo;
 import cn.ggb.gulimall.product.vo.AttrVo;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -144,6 +144,24 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         }
 
         return attrRespVo;
+    }
+    @Transactional
+    @Override
+    public void updateAttr(AttrVo attr) {
+        AttrEntity attrEntity = new AttrEntity();
+        BeanUtils.copyProperties(attr,attrEntity);
+        this.updateById(attrEntity);
+
+        //修改分组关联
+        AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
+        relationEntity.setAttrGroupId(attr.getAttrGroupId());
+        relationEntity.setAttrId(attr.getAttrId());
+        Long count = attrAttrgroupRelationDao.selectCount(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attr.getAttrId()));
+        if (count > 0){
+            attrAttrgroupRelationDao.update(relationEntity,new UpdateWrapper<AttrAttrgroupRelationEntity>().eq("attr_id",attr.getAttrId()));
+        }else {
+            attrAttrgroupRelationDao.insert(relationEntity);
+        }
     }
 
 }
