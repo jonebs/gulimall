@@ -1,15 +1,15 @@
 package cn.ggb.gulimall.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import cn.ggb.gulimall.product.entity.AttrEntity;
+import cn.ggb.gulimall.product.service.AttrService;
 import cn.ggb.gulimall.product.service.CategoryService;
+import cn.ggb.gulimall.product.vo.AttrGroupRelationVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import cn.ggb.gulimall.product.entity.AttrGroupEntity;
 import cn.ggb.gulimall.product.service.AttrGroupService;
@@ -33,6 +33,30 @@ public class AttrGroupController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private AttrService attrService;
+
+    /**
+     * 删除属性与分组的关联关系
+     * @return
+     */
+    @PostMapping("/attr/relation/delete")
+    public R deleteRelation(@RequestBody AttrGroupRelationVo[] relationVo){
+        attrService.deleteRelation(relationVo);
+        return R.ok();
+    }
+
+    /**
+     * 获取属性分组的关联的所有属性
+     * @param attrgroupId
+     * @return
+     */
+    @GetMapping("/{attrgroupId}/attr/relation")
+    public R attrRelation(@PathVariable("attrgroupId") Long attrgroupId){
+        List<AttrEntity> entityList =attrService.getRelationAttr(attrgroupId);
+        return R.ok().put("data",entityList);
+    }
 
     /**
      * 列表

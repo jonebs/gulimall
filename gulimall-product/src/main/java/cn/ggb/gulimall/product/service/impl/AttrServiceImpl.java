@@ -8,6 +8,7 @@ import cn.ggb.gulimall.product.entity.AttrAttrgroupRelationEntity;
 import cn.ggb.gulimall.product.entity.AttrGroupEntity;
 import cn.ggb.gulimall.product.entity.CategoryEntity;
 import cn.ggb.gulimall.product.service.CategoryService;
+import cn.ggb.gulimall.product.vo.AttrGroupRelationVo;
 import cn.ggb.gulimall.product.vo.AttrRespVo;
 import cn.ggb.gulimall.product.vo.AttrVo;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -170,6 +173,44 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             }
         }
 
+    }
+
+    /**
+     * 根据分组id查找关联的所有基本属性
+     * @param attrgroupId
+     * @return
+     */
+    @Override
+    public List<AttrEntity> getRelationAttr(Long attrgroupId) {
+        List<AttrAttrgroupRelationEntity> entities = attrAttrgroupRelationDao.selectList(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_group_id", attrgroupId));
+        // 从关系表中 取到 属性id
+        List<Long> attrIds = entities.stream().map((attr) ->{
+            return attr.getAttrId();
+        }).collect(Collectors.toList());
+
+        if (attrIds == null || attrIds.size() == 0){
+            return null;
+        }
+        // 按照属性id进行查询
+        Collection<AttrEntity> attrEntities = this.listByIds(attrIds);
+        return (List<AttrEntity>) attrEntities;
+    }
+
+    /**
+     * 删除属性与分组的关联关系
+     * @return
+     */
+    @Override
+    public void deleteRelation(AttrGroupRelationVo[] relationVo) {
+        // 转成 list 进行stream流处理
+        List<AttrAttrgroupRelationEntity> entities = Arrays.asList(relationVo).stream().map((item) -> {
+            // 将 item对应属性拷贝到 relationEntity对象中
+            AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
+            BeanUtils.copyProperties(item, relationEntity);
+            return relationEntity;
+        }).collect(Collectors.toList());
+        // id批量删除
+        attrAttrgroupRelationDao.deleteBatchRelation(entities);
     }
 
 }
