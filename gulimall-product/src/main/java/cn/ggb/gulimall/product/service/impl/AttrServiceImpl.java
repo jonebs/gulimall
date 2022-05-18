@@ -213,4 +213,52 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         attrAttrgroupRelationDao.deleteBatchRelation(entities);
     }
 
+    /**
+     * 查询分组未关联属性
+     * @param params
+     * @param attrgroupId
+     * @return
+     */
+    @Override
+    public PageUtils getNoRelationAttr(Map<String, Object> params, Long attrgroupId) {
+        // 1、当前分组只能关联自己所属分类里面的所有属性
+        AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrgroupId);
+        Long catelogId = attrGroupEntity.getCatelogId();
+        //2、当前分组只能关联别的分组没有引用的属性
+        //2.1 当前分类下的 **其他分组** 根据分类id进行查询
+        List<AttrGroupEntity> group = attrGroupDao.selectList(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", catelogId));
+        // 拿到分组id
+        List<Long> collect = group.stream().map((groupEntity) -> {
+            return groupEntity.getAttrGroupId();
+        }).collect(Collectors.toList());
+
+        //2.2 这些分组关联的属性  根据分组id查询出关联表
+        List<AttrAttrgroupRelationEntity> groupId = attrAttrgroupRelationDao.selectList(new QueryWrapper<AttrAttrgroupRelationEntity>().in("attr_group_id", collect));
+        // 拿到所有的属性id
+        List<Long> attrIds = groupId.stream().map((item) -> {
+            return item.getAttrId();
+        }).collect(Collectors.toList());
+
+        //查询需要查询的属性
+        QueryWrapper<AttrEntity> wrapper = new QueryWrapper<AttrEntity>().eq("catelog_id", catelogId).eq("attr_type",ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode());
+        //在pms_attr_attrgroup_relation表中的attrId不需要查询
+        // attrIds 属性id数组不为空
+        if (attrIds != null && attrIds.size() > 0) {
+            // 在attrids 数组中得id不用进行查询
+            wrapper.notIn("attr_id", attrIds);
+        }
+
+        //模糊查询
+        String key = (String)params.get("key");
+        if (!StringUtils.isEmpty(key)){
+            wrapper.and((obj) ->{
+                obj.eq("attr_id",key).or().like("attr_name",key);
+            });
+        }
+        IPage<AttrEntity> page = this.page(new Query<AttrEntity>().getPage(params), wrapper);
+        PageUtils pageUtils = new PageUtils(page);
+
+        return pageUtils;
+    }
+
 }

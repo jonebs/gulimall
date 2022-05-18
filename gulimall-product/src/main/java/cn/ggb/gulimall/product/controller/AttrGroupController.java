@@ -38,6 +38,19 @@ public class AttrGroupController {
     private AttrService attrService;
 
     /**
+     * 查询分组未关联属性
+     * @param params
+     * @param attrgroupId
+     * @return
+     */
+    @GetMapping("/{attrgroupId}/noattr/relation")
+    public R attrNoRelation(@RequestParam Map<String,Object> params,
+                            @PathVariable("attrgroupId") Long attrgroupId){
+        PageUtils page = attrService.getNoRelationAttr(params,attrgroupId);
+        return R.ok().put("page",page);
+    }
+
+    /**
      * 删除属性与分组的关联关系
      * @return
      */
