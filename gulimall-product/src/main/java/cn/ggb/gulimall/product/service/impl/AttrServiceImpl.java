@@ -69,7 +69,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         //保存基本数据
         this.save(attrEntity);
         //保存关联关系
-        if (attr.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()){
+        if (attr.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode() && attr.getAttrGroupId() != null){
             AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
             relationEntity.setAttrGroupId(attr.getAttrGroupId());
             relationEntity.setAttrId(attrEntity.getAttrId());
@@ -105,7 +105,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             if ("base".equalsIgnoreCase(type)){
                 // 1、根据attr_id 查询到 attr和 attrGroup的关系表
                 AttrAttrgroupRelationEntity relationEntity = attrAttrgroupRelationDao.selectById(attrEntity.getAttrId());
-                if (relationEntity != null){
+                if (relationEntity != null && relationEntity.getAttrGroupId() != null){
                     AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(relationEntity.getAttrGroupId());
                     attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
                 }
@@ -125,33 +125,37 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
 
     @Override
     public AttrRespVo getAttrInfo(Long attrId) {
-        // 实例化封装VO数据对象
-        AttrRespVo attrRespVo = new AttrRespVo();
+        AttrRespVo respVo = new AttrRespVo();
         AttrEntity attrEntity = this.getById(attrId);
-        BeanUtils.copyProperties(attrEntity,attrRespVo);
+        BeanUtils.copyProperties(attrEntity,respVo);
 
-        if (attrEntity.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()){
-            //返回所属于分组
-            AttrAttrgroupRelationEntity relationEntity = attrAttrgroupRelationDao.selectById(attrId);
-            attrRespVo.setAttrGroupId(relationEntity.getAttrGroupId());
-            AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(relationEntity.getAttrGroupId());
-            if (attrGroupEntity != null){
-                attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+
+
+        if(attrEntity.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()){
+            //1、设置分组信息
+            AttrAttrgroupRelationEntity attrgroupRelation = attrAttrgroupRelationDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrId));
+            if(attrgroupRelation!=null){
+                respVo.setAttrGroupId(attrgroupRelation.getAttrGroupId());
+                AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrgroupRelation.getAttrGroupId());
+                if(attrGroupEntity!=null){
+                    respVo.setGroupName(attrGroupEntity.getAttrGroupName());
+                }
             }
         }
 
 
-        //返回所属分类
-        Long[] catelogPath = categoryService.findCatelogPath(attrRespVo.getCatelogId());
-        attrRespVo.setCatelogPath(catelogPath);
-
+        //2、设置分类信息
         Long catelogId = attrEntity.getCatelogId();
+        Long[] catelogPath = categoryService.findCatelogPath(catelogId);
+        respVo.setCatelogPath(catelogPath);
+
         CategoryEntity categoryEntity = categoryDao.selectById(catelogId);
-        if (categoryEntity != null){
-            attrRespVo.setCatelogName(categoryEntity.getName());
+        if(categoryEntity!=null){
+            respVo.setCatelogName(categoryEntity.getName());
         }
 
-        return attrRespVo;
+
+        return respVo;
     }
     @Transactional
     @Override

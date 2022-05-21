@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.ggb.gulimall.product.entity.AttrEntity;
+import cn.ggb.gulimall.product.service.AttrAttrgroupRelationService;
 import cn.ggb.gulimall.product.service.AttrService;
 import cn.ggb.gulimall.product.service.CategoryService;
 import cn.ggb.gulimall.product.vo.AttrGroupRelationVo;
@@ -36,6 +37,20 @@ public class AttrGroupController {
 
     @Autowired
     private AttrService attrService;
+
+    @Autowired
+    private AttrAttrgroupRelationService relationService;
+
+    /**
+     * 新增分组与属性关联
+     * @param vos
+     * @return
+     */
+    @PostMapping("/attr/relation")
+    public R addRelation(@RequestBody List<AttrGroupRelationVo> vos){
+        relationService.saveBatch(vos);
+        return R.ok();
+    }
 
     /**
      * 查询分组未关联属性
