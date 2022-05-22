@@ -9,6 +9,8 @@ import cn.ggb.gulimall.product.service.AttrAttrgroupRelationService;
 import cn.ggb.gulimall.product.service.AttrService;
 import cn.ggb.gulimall.product.service.CategoryService;
 import cn.ggb.gulimall.product.vo.AttrGroupRelationVo;
+import cn.ggb.gulimall.product.vo.AttrGroupWithAttrsVo;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +42,18 @@ public class AttrGroupController {
 
     @Autowired
     private AttrAttrgroupRelationService relationService;
+
+    /**
+     *  获取分类下所有分组&关联属性
+     * @param catelogId
+     * @return
+     */
+    @GetMapping("/{catelogId}/withattr")
+    public R getAttrGroupWithAttrs(@PathVariable("catelogId") Long catelogId){
+        List<AttrGroupWithAttrsVo> vos = attrGroupService.getAttrGroupWithAttrsByCatelogId(catelogId);
+
+        return R.ok().put("data",vos);
+    }
 
     /**
      * 新增分组与属性关联
