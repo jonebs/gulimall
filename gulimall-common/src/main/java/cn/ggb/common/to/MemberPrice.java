@@ -1,9 +1,11 @@
 /**
   * Copyright 2022 bejson.com 
   */
-package cn.ggb.gulimall.product.vo;
+package cn.ggb.common.to;
 
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 /**
  * Auto-generated: 2022-05-22 20:55:10
@@ -12,10 +14,11 @@ import lombok.Data;
  * @website http://www.bejson.com/java2pojo/
  */
 @Data
-public class Images {
+public class MemberPrice {
 
-    private String imgUrl;
-    private int defaultImg;
+    private Long id;
+    private String name;
+    private BigDecimal price;
 
 
 }
