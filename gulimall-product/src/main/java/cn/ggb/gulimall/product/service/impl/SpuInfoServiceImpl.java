@@ -191,4 +191,51 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         this.baseMapper.insert(spuInfoEntity);
     }
 
+    /**
+     * spu检索
+     * @param params
+     * @return
+     */
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+        QueryWrapper<SpuInfoEntity> wrapper = new QueryWrapper<>();
+
+        // 取出参数 key 进行查询
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)){
+            wrapper.and(w ->{
+                w.eq("id",key).or().like("spu_name",key);
+            });
+        }
+
+        // 验证不为空 取出参数进行 查询
+        String status = (String)params.get("status");
+        if (!StringUtils.isEmpty(status)){
+            wrapper.and(w ->{
+                w.eq("publish_status",status);
+            });
+        }
+        //查询品牌
+        String brandId = (String)params.get("brandId");
+        if (!StringUtils.isEmpty(brandId) && ! "0".equalsIgnoreCase(brandId)){
+            wrapper.and(w ->{
+                w.eq("brand_id",brandId);
+            });
+        }
+
+        //查询分类
+        String catelogId = (String)params.get("catelogId");
+        if (!StringUtils.isEmpty(catelogId) && ! "0".equalsIgnoreCase(catelogId)){
+            wrapper.and(w ->{
+                w.eq("catalog_id",catelogId);
+            });
+        }
+
+
+        IPage<SpuInfoEntity> page = this.page(
+               new Query<SpuInfoEntity>().getPage(params),wrapper);
+
+        return new PageUtils(page);
+    }
+
 }
