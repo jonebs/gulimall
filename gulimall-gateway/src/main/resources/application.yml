@@ -16,6 +16,13 @@ spring:
           filters: # 重写路径
             - RewritePath=/api/?(?<segment>.*), /$\{segment}
 
+        - id: ware_route
+          uri: lb://gulimall-ware  # lb负载均衡
+          predicates:
+            - Path=/api/ware/**  # path指定对应路径
+          filters: # 重写路径
+            - RewritePath=/api/?(?<segment>.*), /$\{segment}
+
         - id: member_route
           uri: lb://gulimall-member  # lb负载均衡
           predicates:

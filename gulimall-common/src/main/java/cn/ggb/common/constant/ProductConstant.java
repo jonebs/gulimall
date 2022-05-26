@@ -10,6 +10,7 @@ public class ProductConstant {
 
         AttrEnum(int code,String msg){
             this.code = code;
+            this.msg = msg;
         }
 
         public String getMsg(){
