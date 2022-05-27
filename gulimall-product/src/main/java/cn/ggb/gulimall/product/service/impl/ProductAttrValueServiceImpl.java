@@ -15,6 +15,7 @@ import cn.ggb.common.utils.Query;
 import cn.ggb.gulimall.product.dao.ProductAttrValueDao;
 import cn.ggb.gulimall.product.entity.ProductAttrValueEntity;
 import cn.ggb.gulimall.product.service.ProductAttrValueService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("productAttrValueService")
@@ -53,6 +54,7 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
      * @param productAttrValueEntityList
      * @return
      */
+    @Transactional
     @Override
     public void updateSpuAttr(Long spuId, List<ProductAttrValueEntity> productAttrValueEntityList) {
         // 1、根据spuid删除记录
